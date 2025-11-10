@@ -31,6 +31,22 @@ export interface ChatResponse {
   };
 }
 
+export interface StreamResponse {
+  choices: {
+    delta: {
+      content?: string;
+    };
+    index: number;
+    finish_reason: string | null;
+  }[];
+}
+
+export interface StreamCallbacks {
+  onMessage: (content: string) => void;
+  onComplete: (finalContent: string) => void;
+  onError: (error: Error) => void;
+}
+
 export interface ApiError {
   message: string;
   status?: number;
@@ -216,7 +232,170 @@ class DeepSeekService {
     }
   }
 
-  private parseReplies(content: string): string[] {
+  public async generateRepliesStream(
+    opponentMessage: string, 
+    intensity: number,
+    callbacks: StreamCallbacks
+  ): Promise<void> {
+    try {
+      this.validateConfig();
+      await this.waitForRateLimit();
+
+      const systemPrompt = this.createSystemPrompt(intensity);
+      const messages: ChatMessage[] = [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `对方的话：${opponentMessage}` }
+      ];
+
+      // 检查缓存
+      const cacheKey = this.generateCacheKey(messages, intensity);
+      const cachedResponse = this.getCachedResponse(cacheKey);
+      
+      if (cachedResponse) {
+        // 从缓存返回时，仍然模拟流式输出
+        const replies = this.parseReplies(cachedResponse);
+        await this.simulateStreamOutput(replies, callbacks);
+        return;
+      }
+
+      const requestBody: ChatRequest = {
+        model: 'deepseek-chat',
+        messages,
+        stream: true, // 启用流式输出
+        max_tokens: 1000,
+        temperature: 0.8,
+      };
+
+      console.log('发送流式API请求到:', this.config.getConfig().API_BASE_URL);
+
+      const response = await fetch(this.config.getConfig().API_BASE_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.config.getConfig().API_KEY}`,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      console.log('流式API响应状态:', response.status, response.statusText);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('流式API错误响应:', errorText);
+        
+        let errorMessage = `API请求失败 (${response.status})`;
+        
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage += `: ${errorData.error?.message || '未知错误'}`;
+        } catch {
+          errorMessage += `: ${errorText || '未知错误'}`;
+        }
+        
+        throw new Error(errorMessage);
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('无法读取流式响应');
+      }
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let fullContent = '';
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          
+          if (done) break;
+          
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          
+          // 保留最后一个不完整的行
+          buffer = lines.pop() || '';
+          
+          for (const line of lines) {
+            if (line.trim() === '') continue;
+            
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6);
+              
+              if (data === '[DONE]') {
+                // 流式输出完成
+                const replies = this.parseReplies(fullContent);
+                // 缓存结果
+                this.setCachedResponse(cacheKey, fullContent);
+                callbacks.onComplete(fullContent);
+                return;
+              }
+              
+              try {
+                const streamData: StreamResponse = JSON.parse(data);
+                const content = streamData.choices?.[0]?.delta?.content;
+                
+                if (content) {
+                  fullContent += content;
+                  callbacks.onMessage(content);
+                  
+                  // 模拟流式输出，每增加一些内容就稍微延迟
+                  await new Promise(resolve => setTimeout(resolve, 30));
+                }
+              } catch (parseError) {
+                console.warn('解析流式数据失败:', parseError);
+              }
+            }
+          }
+        }
+      } finally {
+        reader.releaseLock();
+      }
+      
+    } catch (error) {
+      console.error('DeepSeek流式API调用失败:', error);
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        callbacks.onError(new Error('网络连接失败，请检查网络连接或稍后重试'));
+      } else {
+        callbacks.onError(error instanceof Error ? error : new Error('未知错误'));
+      }
+    }
+  }
+
+  private async simulateStreamOutput(
+    replies: string[], 
+    callbacks: StreamCallbacks
+  ): Promise<void> {
+    // 模拟流式输出，每个回复逐字输出
+    let fullContent = '';
+    
+    for (let i = 0; i < replies.length; i++) {
+      const reply = replies[i];
+      
+      // 添加回复编号
+      if (i > 0) {
+        fullContent += '\n';
+      }
+      
+      // 逐字输出
+      for (let j = 0; j < reply.length; j++) {
+        const char = reply[j];
+        fullContent += char;
+        callbacks.onMessage(char);
+        await new Promise(resolve => setTimeout(resolve, 30));
+      }
+      
+      // 在回复之间添加小延迟
+      if (i < replies.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+    }
+    
+    callbacks.onComplete(fullContent);
+  }
+
+  public parseReplies(content: string): string[] {
     // 尝试多种方式解析回复内容
     let replies: string[] = [];
 
