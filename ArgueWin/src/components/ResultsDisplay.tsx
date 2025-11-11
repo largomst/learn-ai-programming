@@ -8,10 +8,12 @@ interface ResultsDisplayProps {
   replies: ArgueReply[];
   onRegenerate: () => void;
   isStreaming?: boolean;
+  unifiedContent?: string; // 新增统一流式内容
 }
 
 interface StreamingState {
-  currentContent: string[];
+  // 统一收集所有流式内容的数组
+  allContent: string[];
   isComplete: boolean;
   currentIndex: number;
 }
@@ -22,11 +24,12 @@ interface StreamingReply {
   timestamp: number;
   isStreaming: boolean;
   isComplete: boolean;
+  isUnified?: boolean; // 是否为统一显示区域
 }
 
 type DisplayReply = ArgueReply | StreamingReply;
 
-export default function ResultsDisplay({ replies, onRegenerate, isStreaming = false }: ResultsDisplayProps) {
+export default function ResultsDisplay({ replies, onRegenerate, isStreaming = false, unifiedContent = '' }: ResultsDisplayProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [streamingState, setStreamingState] = useState<StreamingState>({
     currentContent: [],
@@ -38,7 +41,7 @@ export default function ResultsDisplay({ replies, onRegenerate, isStreaming = fa
   useEffect(() => {
     if (isStreaming) {
       setStreamingState({
-        currentContent: [],
+        allContent: [],
         isComplete: false,
         currentIndex: -1
       });
@@ -67,14 +70,15 @@ export default function ResultsDisplay({ replies, onRegenerate, isStreaming = fa
   // 获取要显示的回复内容
   const getDisplayReplies = (): DisplayReply[] => {
     if (isStreaming && !streamingState.isComplete) {
-      // 流式输出时，创建临时的显示回复
-      return streamingState.currentContent.map((content, index) => ({
-        id: `streaming-${index}`,
-        content,
+      // 流式输出时，显示一个统一的临时区域
+      return [{
+        id: 'streaming-unified',
+        content: unifiedContent,
         timestamp: Date.now(),
         isStreaming: true,
-        isComplete: false
-      }));
+        isComplete: false,
+        isUnified: true
+      }];
     }
     return replies;
   };
@@ -97,6 +101,7 @@ export default function ResultsDisplay({ replies, onRegenerate, isStreaming = fa
           // 使用类型守卫检查是否是流式回复
           const isStreaming = 'isStreaming' in reply ? reply.isStreaming : false;
           const isComplete = 'isComplete' in reply ? reply.isComplete : true;
+          const isUnified = 'isUnified' in reply ? reply.isUnified : false;
           
           return (
             <div
@@ -107,9 +112,11 @@ export default function ResultsDisplay({ replies, onRegenerate, isStreaming = fa
               <div className="flex items-start justify-between">
                 <div className="flex-1 mr-4">
                   <div className="flex items-center mb-2">
-                    <span className="inline-flex items-center justify-center w-6 h-6 bg-wechat-primary text-white text-sm font-medium rounded-full mr-3">
-                      {index + 1}
-                    </span>
+                    {!isUnified && (
+                      <span className="inline-flex items-center justify-center w-6 h-6 bg-wechat-primary text-white text-sm font-medium rounded-full mr-3">
+                        {index + 1}
+                      </span>
+                    )}
                     <span className="text-sm text-gray-500">
                       {isStreaming ? '正在输入...' : new Date(reply.timestamp).toLocaleTimeString()}
                     </span>
@@ -187,21 +194,20 @@ export function useStreamingOutput(
   onError: (error: string) => void
 ) {
   const [isStreaming, setIsStreaming] = useState(false);
-  const [streamedContent, setStreamedContent] = useState<string[]>([]);
+  const [unifiedContent, setUnifiedContent] = useState<string>(''); // 统一收集所有内容
   const [error, setError] = useState<string | null>(null);
 
   const startStreaming = () => {
     setIsStreaming(true);
-    setStreamedContent([]);
+    setUnifiedContent('');
     setError(null);
   };
 
   const addContent = (content: string, index: number) => {
-    setStreamedContent(prev => {
-      const newContent = [...prev];
-      newContent[index] = (newContent[index] || '') + content;
-      return newContent;
-    });
+    // 所有内容都累积到统一字符串中
+    setUnifiedContent(prev => prev + content);
+    // 同时调用原有的onNewContent回调（如果需要的话）
+    onNewContent(content, index);
   };
 
   const completeStreaming = (fullContent: string) => {
@@ -217,7 +223,7 @@ export function useStreamingOutput(
 
   return {
     isStreaming,
-    streamedContent,
+    unifiedContent,
     error,
     startStreaming,
     addContent,

@@ -16,7 +16,7 @@ export default function Home() {
   // 使用流式输出的Hook
   const {
     isStreaming,
-    streamedContent,
+    unifiedContent,
     error: streamingError,
     startStreaming,
     addContent,
@@ -24,7 +24,9 @@ export default function Home() {
     handleError
   } = useStreamingOutput(
     (content: string, index: number) => {
-      addContent(content, index);
+      // 在新的统一流式模式下，我们只需要累积内容到unifiedContent中
+      // 这里不需要递归调用addContent，直接更新state
+      setUnifiedContent(prev => prev + content);
     },
     (allContent: string) => {
       // 解析完整的流式内容并设置回复
@@ -170,10 +172,11 @@ export default function Home() {
 
           {/* 流式内容显示 */}
           {isStreaming && (
-            <StreamingDisplay 
-              streamedContent={streamedContent}
-              isComplete={!isStreaming}
+            <ResultsDisplay 
+              replies={[]} 
               onRegenerate={() => {}}
+              isStreaming={true}
+              unifiedContent={unifiedContent}
             />
           )}
 
