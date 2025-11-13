@@ -12,8 +12,8 @@
 - 用户输入“对方的话”
 - 用户选择“语气强烈程度”，是一个从1到10可以拖动的小玩意儿
 - 用户点击“开始吵架”
-- 网站调用 deepseek 的 deepseek-chat 模型，生成3条牛逼的吵架内容。
-- 回复内容你需要使用大模型。我们使用 deepseek 上面的 deepseek-chat 模型吧。这是它的API文档： https://api-docs.deepseek.com/zh-cn/
+- 网站调用由环境变量 `MODEL` 指定的模型，生成3条牛逼的吵架内容。
+- 回复内容你需要使用大模型。模型名称通过环境变量 `MODEL` 配置。DeepSeek API 文档： https://api-docs.deepseek.com/zh-cn/
 
 ## API
-API_BASE_URL 和 API_KEY  存储在当前目录下的 .env 文件中，你需要 load 并使用它们
+API_BASE_URL、API_KEY、MODEL 存储在当前目录下的 .env/.env.local 文件中，你需要 load 并使用它们

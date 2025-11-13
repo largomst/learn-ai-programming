@@ -2,6 +2,7 @@
 interface Config {
   API_BASE_URL: string;
   API_KEY: string;
+  MODEL: string;
 }
 
 class ConfigService {
@@ -12,6 +13,7 @@ class ConfigService {
     this.config = {
       API_BASE_URL: process.env.API_BASE_URL || '',
       API_KEY: process.env.API_KEY || '',
+      MODEL: process.env.MODEL || '',
     };
   }
 
@@ -27,7 +29,7 @@ class ConfigService {
   }
 
   public validateConfig(): boolean {
-    return !!(this.config.API_BASE_URL && this.config.API_KEY);
+    return !!(this.config.API_BASE_URL && this.config.API_KEY && this.config.MODEL);
   }
 }
 

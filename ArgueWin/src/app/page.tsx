@@ -3,7 +3,6 @@
 import { useState, useCallback } from 'react';
 import InputForm from '@/components/InputForm';
 import ResultsDisplay, { useStreamingOutput } from '@/components/ResultsDisplay';
-import StreamingDisplay from '@/components/StreamingDisplay';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { ArgueReply, FormData } from '@/lib/types';
 import DeepSeekService from '@/lib/deepseek';
@@ -23,10 +22,7 @@ export default function Home() {
     completeStreaming,
     handleError
   } = useStreamingOutput(
-    (content: string, index: number) => {
-      // 在新的统一流式模式下，我们只需要累积内容到unifiedContent中
-      // 这里不需要递归调用addContent，直接更新state
-      setUnifiedContent(prev => prev + content);
+    () => {
     },
     (allContent: string) => {
       // 解析完整的流式内容并设置回复

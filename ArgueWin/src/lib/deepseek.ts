@@ -59,6 +59,7 @@ class DeepSeekService {
   private requestCache: Map<string, { timestamp: number; result: string }>;
   private readonly CACHE_TTL = 5 * 60 * 1000; // 5分钟缓存
   private readonly MIN_REQUEST_INTERVAL = 1000; // 1秒请求间隔
+  private lastRequestTime = 0;
 
   private constructor() {
     this.config = ConfigService.getInstance();
@@ -73,8 +74,13 @@ class DeepSeekService {
   }
 
   private validateConfig(): void {
-    if (!this.config.validateConfig()) {
-      throw new Error('API配置验证失败，请检查环境变量');
+    const cfg = this.config.getConfig();
+    const missing: string[] = [];
+    if (!cfg.API_BASE_URL) missing.push('API_BASE_URL');
+    if (!cfg.API_KEY) missing.push('API_KEY');
+    if (!cfg.MODEL) missing.push('MODEL');
+    if (missing.length) {
+      throw new Error(`环境变量缺失：${missing.join(', ')}`);
     }
   }
 
@@ -126,17 +132,13 @@ class DeepSeekService {
   }
 
   private async waitForRateLimit(): Promise<void> {
-    // 简单的请求限流实现
     const now = Date.now();
-    const lastRequest = (this as any).lastRequestTime || 0;
-    const timeSinceLastRequest = now - lastRequest;
-    
+    const timeSinceLastRequest = now - this.lastRequestTime;
     if (timeSinceLastRequest < this.MIN_REQUEST_INTERVAL) {
       const waitTime = this.MIN_REQUEST_INTERVAL - timeSinceLastRequest;
       await new Promise(resolve => setTimeout(resolve, waitTime));
     }
-    
-    (this as any).lastRequestTime = Date.now();
+    this.lastRequestTime = Date.now();
   }
 
   public async generateReplies(
@@ -162,7 +164,7 @@ class DeepSeekService {
       }
 
       const requestBody: ChatRequest = {
-        model: 'deepseek-chat',
+        model: this.config.getConfig().MODEL,
         messages,
         stream: false,
         max_tokens: 1000,
@@ -259,9 +261,9 @@ class DeepSeekService {
       }
 
       const requestBody: ChatRequest = {
-        model: 'deepseek-chat',
+        model: this.config.getConfig().MODEL,
         messages,
-        stream: true, // 启用流式输出
+        stream: true,
         max_tokens: 1000,
         temperature: 0.8,
       };
@@ -324,7 +326,6 @@ class DeepSeekService {
               
               if (data === '[DONE]') {
                 // 流式输出完成
-                const replies = this.parseReplies(fullContent);
                 // 缓存结果
                 this.setCachedResponse(cacheKey, fullContent);
                 callbacks.onComplete(fullContent);

@@ -7,7 +7,6 @@ import CopyButton from '@/components/CopyButton';
 interface StreamingDisplayProps {
   streamedContent: string[];
   isComplete: boolean;
-  onRegenerate: () => void;
 }
 
 interface StreamingReply extends Omit<ArgueReply, 'id'> {
@@ -17,8 +16,7 @@ interface StreamingReply extends Omit<ArgueReply, 'id'> {
 
 export default function StreamingDisplay({ 
   streamedContent, 
-  isComplete, 
-  onRegenerate 
+  isComplete
 }: StreamingDisplayProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -45,7 +43,7 @@ export default function StreamingDisplay({
   const getDisplayReplies = (): StreamingReply[] => {
     const replies: StreamingReply[] = [];
     
-    streamedContent.forEach((content, index) => {
+    streamedContent.forEach((content) => {
       if (content.trim()) {
         replies.push({
           content: content.trim(),
@@ -115,7 +113,6 @@ export default function StreamingDisplay({
                 {!isStreaming && (
                   <div className="flex-shrink-0">
                     <CopyButton
-                      text={reply.content}
                       onCopy={() => handleCopy(reply.content, `streaming-${index}`)}
                       copied={copiedId === `streaming-${index}`}
                     />

@@ -32,7 +32,7 @@ type DisplayReply = ArgueReply | StreamingReply;
 export default function ResultsDisplay({ replies, onRegenerate, isStreaming = false, unifiedContent = '' }: ResultsDisplayProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [streamingState, setStreamingState] = useState<StreamingState>({
-    currentContent: [],
+    allContent: [],
     isComplete: false,
     currentIndex: -1
   });
@@ -138,7 +138,6 @@ export default function ResultsDisplay({ replies, onRegenerate, isStreaming = fa
                 {!isStreaming && (
                   <div className="flex-shrink-0">
                     <CopyButton
-                      text={reply.content}
                       onCopy={() => handleCopy(reply.content, reply.id)}
                       copied={copiedId === reply.id}
                     />

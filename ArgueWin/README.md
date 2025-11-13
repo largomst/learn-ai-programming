@@ -4,7 +4,7 @@
 
 ## 功能特性
 
-- 🤖 **AI驱动**: 使用DeepSeek的deepseek-chat模型生成高质量回复
+- 🤖 **AI驱动**: 使用环境变量配置的模型生成高质量回复
 - 🎚️ **语气强度调节**: 10级滑块控制，从轻微到极度强烈
 - 📱 **响应式设计**: 完美适配移动端和桌面端
 - 🎨 **微信风格UI**: 采用微信绿色主题，界面清新简洁
@@ -18,7 +18,7 @@
 - **前端框架**: Next.js 15 + React 19
 - **开发语言**: TypeScript
 - **样式方案**: Tailwind CSS
-- **AI服务**: DeepSeek API (deepseek-chat)
+- **AI服务**: DeepSeek API（由环境变量 `MODEL` 指定）
 - **数据存储**: localStorage
 
 ## 快速开始
@@ -41,10 +41,11 @@ npm install
 ```
 
 3. 配置环境变量
-在项目根目录创建 `.env.local` 文件：
+在项目根目录创建 `.env` 或 `.env.local` 文件：
 ```env
 API_BASE_URL=https://api.deepseek.com/v1/chat/completions
 API_KEY=你的DeepSeek_API_Key
+MODEL=deepseek-chat
 ```
 
 4. 启动开发服务器
@@ -102,7 +103,7 @@ src/
 - **InputForm**: 处理用户输入，包括文本和多级滑块
 - **ResultsDisplay**: 展示生成的回复内容，支持一键复制
 - **DeepSeekService**: 封装API调用，包含缓存和错误处理逻辑
-- **ConfigService**: 管理环境变量和配置验证
+- **ConfigService**: 管理环境变量和配置验证（包含 MODEL）
 
 ### 特色功能
 

@@ -1,11 +1,10 @@
 interface CopyButtonProps {
-  text: string;
   onCopy: () => void;
   copied: boolean;
   size?: 'sm' | 'md';
 }
 
-export default function CopyButton({ text, onCopy, copied, size = 'md' }: CopyButtonProps) {
+export default function CopyButton({ onCopy, copied, size = 'md' }: CopyButtonProps) {
   const sizeClasses = {
     sm: 'w-8 h-8 text-xs',
     md: 'w-10 h-10 text-sm'
