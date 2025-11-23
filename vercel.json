@@ -6,8 +6,8 @@
       "use": "@vercel/next"
     }
   ],
-  "installCommand": "pnpm install --dir ArgueWin --frozen-lockfile",
-  "buildCommand": "pnpm --dir ArgueWin run build",
+  "installCommand": "npm install --dir ArgueWin --frozen-lockfile",
+  "buildCommand": "npm --dir ArgueWin run build",
   "git": {
     "deploymentEnabled": true
   }
