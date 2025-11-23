@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "ArgueWin/package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "installCommand": "pnpm install --dir ArgueWin --frozen-lockfile",
+  "buildCommand": "pnpm --dir ArgueWin run build",
+  "git": {
+    "deploymentEnabled": true
+  }
+}
