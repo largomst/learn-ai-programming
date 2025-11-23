@@ -88,10 +88,10 @@ export default function ResultsDisplay({ replies, onRegenerate, isStreaming = fa
   return (
     <div className="space-y-4">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+        <h2 className="text-2xl font-bold text-[#F4C169] mb-2">
           {isStreaming ? '正在生成吵架回复...' : '吵架回复'}
         </h2>
-        <p className="text-gray-600">
+        <p className="text-[#CBB693]">
           {isStreaming ? 'AI正在逐字生成您的专属回复' : '点击复制按钮快速复制回复内容'}
         </p>
       </div>
@@ -117,7 +117,7 @@ export default function ResultsDisplay({ replies, onRegenerate, isStreaming = fa
                         {index + 1}
                       </span>
                     )}
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-[#B39A7C]">
                       {isStreaming ? '正在输入...' : new Date(reply.timestamp).toLocaleTimeString()}
                     </span>
                     {isStreaming && (
@@ -128,7 +128,7 @@ export default function ResultsDisplay({ replies, onRegenerate, isStreaming = fa
                       </div>
                     )}
                   </div>
-                  <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">
+                  <p className="text-[#E7D3B0] leading-relaxed whitespace-pre-wrap">
                     {reply.content}
                     {isStreaming && !isComplete && (
                       <span className="inline-block w-1 h-5 bg-wechat-primary ml-1 animate-pulse"></span>
@@ -176,7 +176,7 @@ export default function ResultsDisplay({ replies, onRegenerate, isStreaming = fa
         {isStreaming && (
           <button
             onClick={() => window.location.reload()}
-            className="inline-flex items-center px-4 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 hover:border-gray-400 rounded-lg transition-colors duration-200"
+            className="inline-flex items-center px-4 py-2 text-sm text-[#CBB693] hover:text-[#E7D3B0] border border-[#3A2A1F] hover:border-[#5A412F] rounded-lg transition-colors duration-200"
           >
             取消生成
           </button>

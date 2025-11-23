@@ -8,9 +8,9 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'wechat-primary': '#07C160',
-        'wechat-primary-hover': '#06AD54',
-        'wechat-primary-active': '#05984B',
+        'wechat-primary': '#F4B045',
+        'wechat-primary-hover': '#E2A037',
+        'wechat-primary-active': '#C5832A',
       },
     },
   },

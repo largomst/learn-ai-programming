@@ -9,7 +9,7 @@ body {
 
 /* 微信风格按钮 */
 .wechat-button {
-  @apply bg-[#07C160] hover:bg-[#06AD54] active:bg-[#05984B] text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 shadow-sm;
+  @apply bg-wechat-primary hover:bg-wechat-primary-hover active:bg-wechat-primary-active text-[#1B1511] font-medium py-3 px-6 rounded-lg transition-colors duration-200 shadow-sm;
 }
 
 .wechat-button:disabled {
@@ -18,20 +18,20 @@ body {
 
 /* 自定义滑块样式 */
 .intensity-slider {
-  @apply w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer;
+  @apply w-full h-2 bg-[#3A2A1F] rounded-lg appearance-none cursor-pointer;
 }
 
 .intensity-slider::-webkit-slider-thumb {
-  @apply appearance-none w-5 h-5 bg-[#07C160] rounded-full cursor-pointer shadow-md;
+  @apply appearance-none w-5 h-5 bg-wechat-primary rounded-full cursor-pointer shadow-md;
 }
 
 .intensity-slider::-moz-range-thumb {
-  @apply w-5 h-5 bg-[#07C160] rounded-full cursor-pointer border-0 shadow-md;
+  @apply w-5 h-5 bg-wechat-primary rounded-full cursor-pointer border-0 shadow-md;
 }
 
 /* 输入框样式 */
 .wechat-input {
-  @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#07C160] focus:border-transparent outline-none transition-all duration-200;
+  @apply w-full px-4 py-3 border rounded-lg outline-none transition-all duration-200 bg-[#2A1D16] border-[#3A2A1F] text-[#E7D3B0] placeholder-[#A88F73] focus:ring-2 focus:ring-wechat-primary focus:border-transparent;
 }
 
 .wechat-input:focus {
@@ -40,38 +40,38 @@ body {
 
 /* 卡片样式 */
 .wechat-card {
-  @apply bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden;
+  @apply bg-[#241915] rounded-lg shadow-sm border border-[#3A2A1F] overflow-hidden;
 }
 
 /* 文本颜色 */
 .text-wechat-primary {
-  @apply text-[#07C160];
+  @apply text-[#F4B045];
 }
 
 .text-wechat-primary-hover {
-  @apply text-[#06AD54];
+  @apply text-[#E2A037];
 }
 
 /* 边框颜色 */
 .border-wechat-primary {
-  @apply border-[#07C160];
+  @apply border-[#F4B045];
 }
 
 .border-wechat-primary-hover {
-  @apply border-[#06AD54];
+  @apply border-[#E2A037];
 }
 
 /* 背景颜色 */
 .bg-wechat-primary {
-  @apply bg-[#07C160];
+  @apply bg-[#F4B045];
 }
 
 .bg-wechat-primary-hover {
-  @apply bg-[#06AD54];
+  @apply bg-[#E2A037];
 }
 
 .bg-wechat-primary-active {
-  @apply bg-[#05984B];
+  @apply bg-[#C5832A];
 }
 
 /* 动画 */

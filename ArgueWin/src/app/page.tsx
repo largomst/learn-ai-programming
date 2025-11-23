@@ -132,14 +132,14 @@ export default function Home() {
   }, [handleGenerate, setReplies, setError]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#1B1511]">
       {/* 头部 */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-transparent border-b border-[#3A2A1F]">
         <div className="max-w-4xl mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold text-center text-gray-900">
+          <h1 className="text-4xl font-bold text-center bg-gradient-to-r from-[#F4C169] to-[#FF9C3A] bg-clip-text text-transparent">
             吵架包赢
           </h1>
-          <p className="mt-2 text-center text-gray-600">
+          <p className="mt-2 text-center text-[#CBB693]">
             输入对方的话，选择语气强度，让AI帮你生成有力的回复
             {isStreaming && <span className="text-wechat-primary ml-2">• 正在流式输出</span>}
           </p>
@@ -188,9 +188,9 @@ export default function Home() {
       </main>
 
       {/* 页脚 */}
-      <footer className="bg-white border-t border-gray-200 mt-16">
+      <footer className="bg-transparent border-t border-[#3A2A1F] mt-16">
         <div className="max-w-4xl mx-auto px-4 py-6">
-          <p className="text-center text-gray-500 text-sm">
+          <p className="text-center text-[#B39A7C] text-sm">
             © 2024 吵架包赢. 由 DeepSeek AI 驱动
             {isStreaming && <span className="text-wechat-primary ml-1">• 流式输出已启用</span>}
           </p>

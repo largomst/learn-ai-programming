@@ -15,8 +15,8 @@ export default function CopyButton({ onCopy, copied, size = 'md' }: CopyButtonPr
       onClick={onCopy}
       className={`${sizeClasses[size]} inline-flex items-center justify-center rounded-lg border transition-all duration-200 ${
         copied
-          ? 'bg-green-50 border-green-200 text-green-700'
-          : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50 hover:border-wechat-primary hover:text-wechat-primary'
+          ? 'bg-[#2E2219] border-[#5A412F] text-wechat-primary'
+          : 'bg-[#2A1D16] border-[#3A2A1F] text-[#CBB693] hover:bg-[#241915] hover:border-wechat-primary hover:text-wechat-primary'
       }`}
       title={copied ? '已复制!' : '复制'}
     >

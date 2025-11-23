@@ -71,7 +71,7 @@ export default function InputForm({ onSubmit, disabled = false }: InputFormProps
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* 对方的话输入框 */}
         <div>
-          <label htmlFor="opponentMessage" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="opponentMessage" className="block text-sm font-medium text-[#D8C4A0] mb-2">
             对方的话
           </label>
           <textarea
@@ -87,7 +87,7 @@ export default function InputForm({ onSubmit, disabled = false }: InputFormProps
 
         {/* 语气强度滑块 */}
         <div>
-          <label htmlFor="intensity" className="block text-sm font-medium text-gray-700 mb-3">
+          <label htmlFor="intensity" className="block text-sm font-medium text-[#D8C4A0] mb-3">
             语气强度: <span className="text-wechat-primary font-semibold">{INTENSITY_LABELS[intensity]}</span>
           </label>
           <div className="space-y-3">
@@ -101,7 +101,7 @@ export default function InputForm({ onSubmit, disabled = false }: InputFormProps
               className="intensity-slider"
               disabled={disabled}
             />
-            <div className="flex justify-between text-xs text-gray-500">
+            <div className="flex justify-between text-xs text-[#A88F73]">
               <span>轻微</span>
               <span>温和</span>
               <span>一般</span>
