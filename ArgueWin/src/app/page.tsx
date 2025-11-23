@@ -54,63 +54,96 @@ export default function Home() {
 
     try {
       const apiService = DeepSeekService.getInstance();
-      
-      // 使用流式输出
       startStreaming();
-      
-      let currentReplyIndex = 0;
-      
-      await apiService.generateRepliesStream(
-        formData.opponentMessage,
-        formData.intensity,
-        {
-          onMessage: (content: string) => {
-            // 简单的回复索引跟踪
-            if (content.trim().match(/^\d+[.、]/)) {
-              currentReplyIndex++;
-            }
-            addContent(content, Math.min(currentReplyIndex, 2)); // 限制在3个回复内
-          },
-          onComplete: (fullContent: string) => {
-            // 流式输出完成，解析所有内容
-            const parsedReplies = apiService.parseReplies(fullContent);
-            
-            const newReplies: ArgueReply[] = parsedReplies.map((content, index) => ({
-              id: `reply-${Date.now()}-${index}`,
-              content: content.trim(),
-              timestamp: Date.now(),
-            }));
-            
-            setReplies(newReplies);
-            
-            // 保存到本地存储
-            const sessionData = {
-              id: `session-${Date.now()}`,
-              opponentMessage: formData.opponentMessage,
-              intensity: formData.intensity,
-              replies: newReplies,
-              createdAt: Date.now(),
-            };
 
-            // 存储到localStorage
-            const existingSessions = JSON.parse(localStorage.getItem('argue-sessions') || '[]');
-            existingSessions.unshift(sessionData);
-            
-            // 只保留最近10个会话
-            if (existingSessions.length > 10) {
-              existingSessions.splice(10);
+      let currentReplyIndex = 0;
+
+      const response = await fetch('/api/deepseek', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          opponentMessage: formData.opponentMessage,
+          intensity: formData.intensity,
+          stream: true,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || '服务端请求失败');
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('无法读取服务端流式响应');
+      }
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let fullContent = '';
+
+      try {
+        // 读取服务端转发的 SSE 流
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (line.trim() === '') continue;
+
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6);
+
+              if (data === '[DONE]') {
+                const parsedReplies = apiService.parseReplies(fullContent);
+                const newReplies: ArgueReply[] = parsedReplies.map((content, index) => ({
+                  id: `reply-${Date.now()}-${index}`,
+                  content: content.trim(),
+                  timestamp: Date.now(),
+                }));
+                setReplies(newReplies);
+
+                const sessionData = {
+                  id: `session-${Date.now()}`,
+                  opponentMessage: formData.opponentMessage,
+                  intensity: formData.intensity,
+                  replies: newReplies,
+                  createdAt: Date.now(),
+                };
+                const existingSessions = JSON.parse(localStorage.getItem('argue-sessions') || '[]');
+                existingSessions.unshift(sessionData);
+                if (existingSessions.length > 10) {
+                  existingSessions.splice(10);
+                }
+                localStorage.setItem('argue-sessions', JSON.stringify(existingSessions));
+                completeStreaming(fullContent);
+                return;
+              }
+
+              try {
+                const streamData = JSON.parse(data);
+                const content = streamData?.choices?.[0]?.delta?.content;
+                if (content) {
+                  fullContent += content;
+                  if (content.trim().match(/^\d+[.、]/)) {
+                    currentReplyIndex++;
+                  }
+                  addContent(content, Math.min(currentReplyIndex, 2));
+                  await new Promise(resolve => setTimeout(resolve, 30));
+                }
+              } catch {
+              }
             }
-            
-            localStorage.setItem('argue-sessions', JSON.stringify(existingSessions));
-            completeStreaming(fullContent);
-          },
-          onError: (error: Error) => {
-            setError(error.message);
-            handleError(error.message);
           }
         }
-      );
-      
+      } finally {
+        reader.releaseLock();
+      }
+
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : '生成回复失败，请重试';
       setError(errorMessage);
